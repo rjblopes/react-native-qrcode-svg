@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Image as RNImage } from 'react-native'
 import PropTypes from 'prop-types'
-import Svg, { Defs, G, Rect, Path, Image, ClipPath } from 'react-native-svg'
+import Svg, { Defs, G, Rect, Path, Image, ClipPath, Circle } from 'react-native-svg'
 import genMatrix from './genMatrix'
 
 const DEFAULT_SIZE = 100
@@ -72,7 +72,7 @@ export default class QRCode extends PureComponent {
     try {
       this._matrix = genMatrix(value, ecl)
       this._cellSize = size / this._matrix.length
-      this._path = this.transformMatrixIntoPath()
+      // this._path = this.transformMatrixIntoPath()
     } catch (error) {
       if (onError && typeof onError === 'function') {
         onError(error)
@@ -83,32 +83,53 @@ export default class QRCode extends PureComponent {
     }
   }
   /* project the matrix into path draw */
-  transformMatrixIntoPath () {
+  // transformMatrixIntoPath () {
+  //   const matrix = this._matrix
+  //   const cellSize = this._cellSize
+  //   // adjust origin
+  //   let d = ''
+  //   matrix.forEach((row, i) => {
+  //     let needDraw = false
+  //     row.forEach((column, j) => {
+  //       if (column) {
+  //         if (!needDraw) {
+  //           d += `M${cellSize * j} ${cellSize / 2 + cellSize * i} `
+  //           needDraw = true
+  //         }
+  //         if (needDraw && j === matrix.length - 1) {
+  //           d += `L${cellSize * (j + 1)} ${cellSize / 2 + cellSize * i} `
+  //         }
+  //       } else {
+  //         if (needDraw) {
+  //           d += `L${cellSize * j} ${cellSize / 2 + cellSize * i} `
+  //           needDraw = false
+  //         }
+  //       }
+  //     })
+  //   })
+  //   return d
+  // }
+  renderCell(row, col) {
+    const size = this._cellSize;
+    const cx = `${(col * size) + (size / 2)}`;
+    const cy = `${(row * size) + (size / 2)}`;
+    const r = `${size / 2}`;
+    return (<Circle cx={cx} cy={cy} r={r} />);
+  }
+
+  renderMatrix() {
     const matrix = this._matrix
-    const cellSize = this._cellSize
-    // adjust origin
-    let d = ''
+    let cells = [];
     matrix.forEach((row, i) => {
-      let needDraw = false
       row.forEach((column, j) => {
         if (column) {
-          if (!needDraw) {
-            d += `M${cellSize * j} ${cellSize / 2 + cellSize * i} `
-            needDraw = true
-          }
-          if (needDraw && j === matrix.length - 1) {
-            d += `L${cellSize * (j + 1)} ${cellSize / 2 + cellSize * i} `
-          }
-        } else {
-          if (needDraw) {
-            d += `L${cellSize * j} ${cellSize / 2 + cellSize * i} `
-            needDraw = false
-          }
+          cells.push(this.renderCell(i,j));
         }
-      })
-    })
-    return d
+      });
+    });
+    return cells;
   }
+
   render () {
     const {
       getRef, size, color, backgroundColor,
@@ -144,13 +165,7 @@ export default class QRCode extends PureComponent {
           height={size}
           fill={backgroundColor}
         />
-        { this._path && this._cellSize && (
-          <Path
-            d={this._path}
-            stroke={color}
-            strokeWidth={this._cellSize}
-          />
-        )}
+        {this.renderMatrix()}
         {logo && (
           <G x={logoPosition} y={logoPosition}>
             <Rect
