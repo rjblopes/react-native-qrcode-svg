@@ -72,7 +72,6 @@ export default class QRCode extends PureComponent {
     try {
       this._matrix = genMatrix(value, ecl)
       this._cellSize = size / this._matrix.length
-      // this._path = this.transformMatrixIntoPath()
     } catch (error) {
       if (onError && typeof onError === 'function') {
         onError(error)
@@ -82,39 +81,12 @@ export default class QRCode extends PureComponent {
       }
     }
   }
-  /* project the matrix into path draw */
-  // transformMatrixIntoPath () {
-  //   const matrix = this._matrix
-  //   const cellSize = this._cellSize
-  //   // adjust origin
-  //   let d = ''
-  //   matrix.forEach((row, i) => {
-  //     let needDraw = false
-  //     row.forEach((column, j) => {
-  //       if (column) {
-  //         if (!needDraw) {
-  //           d += `M${cellSize * j} ${cellSize / 2 + cellSize * i} `
-  //           needDraw = true
-  //         }
-  //         if (needDraw && j === matrix.length - 1) {
-  //           d += `L${cellSize * (j + 1)} ${cellSize / 2 + cellSize * i} `
-  //         }
-  //       } else {
-  //         if (needDraw) {
-  //           d += `L${cellSize * j} ${cellSize / 2 + cellSize * i} `
-  //           needDraw = false
-  //         }
-  //       }
-  //     })
-  //   })
-  //   return d
-  // }
   renderCell(row, col) {
     const size = this._cellSize;
     const cx = `${(col * size) + (size / 2)}`;
     const cy = `${(row * size) + (size / 2)}`;
     const r = `${size / 2}`;
-    return (<Circle cx={cx} cy={cy} r={r} />);
+    return (<Circle key={`${cx}.${cy}`} cx={cx} cy={cy} r={r} />);
   }
 
   renderMatrix() {
